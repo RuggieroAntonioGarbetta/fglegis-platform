@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Area Notaio - FG LEGIS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Poppins', Arial, sans-serif;
+      padding: 40px 20px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #003366;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 850px;
+      margin: auto;
+    }
+
+    li {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid #003366;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn {
+      background-color: #003366;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      background-color: #00509e;
+    }
+
+    .documento {
+      font-size: 0.95rem;
+      margin-left: 15px;
+      margin-top: 5px;
+    }
+
+    form {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 18px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #00509e;
+    }
+
+    .no-pratiche {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📘 Area Notaio – {{ request.user.username }}</h1>
+
+  {% if pratiche %}
+    <ul>
+      {% for pratica in pratiche %}
+        <li>
+          <strong>{{ pratica.nome_azienda }}</strong> –
+          {% if pratica.tipo_pratica != 'altro' %}
+            {{ pratica.get_tipo_pratica_display }}
+          {% else %}
+            {{ pratica.tipo_personalizzato }}
+          {% endif %}
+
+          <div class="mt-3">
+            <u>📂 Documenti presenti:</u>
+            {% for doc in pratica.documenti.all %}
+              <div class="documento">
+                📄 <strong>{{ doc.nome }}</strong>
+                {% if doc.file %}
+                  – <a href="{{ doc.file.url }}" download>Scarica</a>
+                {% else %}
+                  – <span style="color: red;">(non caricato)</span>
+                {% endif %}
+              </div>
+            {% empty %}
+              <div class="documento">Nessun documento.</div>
+            {% endfor %}
+          </div>
+
+          <form method="post" action="{% url 'area_notaio' %}">
+            {% csrf_token %}
+            <input type="hidden" name="pratica_id" value="{{ pratica.id }}">
+            <input type="text" name="nome_documento" placeholder="📌 Richiedi nuovo documento" required>
+            <button type="submit">➕ Aggiungi</button>
+          </form>
+
+          <a href="{% url 'real_estate:dettaglio_pratica' pratica.id %}" class="btn">🔍 Apri pratica</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="no-pratiche">🔎 Nessuna pratica assegnata al momento.</p>
+  {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+{% extends 'real_estate/base.html' %}
+{% load static %}
+
+{% block title %}FG LEGIS - Area Documentale Immobiliare{% endblock %}
+
+{% block content %}
+  <style>
+    .home-container {
+      background-color: #001f3f;
+      color: white;
+      text-align: center;
+      padding: 80px 20px 60px;
+      font-family: 'Poppins', Arial, sans-serif;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo {
+      width: 160px;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: gold;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      max-width: 600px;
+    }
+
+    .button-container {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .button {
+      background-color: gold;
+      color: #001f3f;
+      padding: 12px 25px;
+      text-decoration: none;
+      font-size: 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #e6c200;
+    }
+
+    @media (max-width: 480px) {
+      .button {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+
+  <div class="home-container">
+    <img src="{% static 'img/logo_fglegis.png' %}" alt="FG LEGIS" class="logo" loading="lazy">
+    <h1>Benvenuto in FG LEGIS</h1>
+    <p>
+      Piattaforma documentale immobiliare per agenzie, store manager, notai e tecnici. Accedi all’area riservata per gestire le tue pratiche in modo semplice, digitale e sicuro.
+    </p>
+    <div class="button-container">
+      <a href="{% url 'login' %}" class="button">🔑 Accedi</a>
+      <a href="{% url 'real_estate:register' %}" class="button">📝 Registrati</a>
+    </div>
+  </div>
+{% endblock %}

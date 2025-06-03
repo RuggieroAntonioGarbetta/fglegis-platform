@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Area Geometra - FG LEGIS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #f4f4f4;
+      font-family: 'Poppins', Arial, sans-serif;
+      padding: 30px 15px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #003366;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 auto;
+      max-width: 800px;
+    }
+
+    li {
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid #003366;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn {
+      background: #003366;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    form {
+      margin-top: 15px;
+    }
+
+    input[type="text"], input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #00509e;
+    }
+
+    .doc-label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    .doc-link {
+      font-size: 0.95rem;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .no-pratiche {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Benvenuto nella tua area, Geometra {{ request.user.username }}</h1>
+
+  {% if pratiche %}
+    <ul>
+      {% for pratica in pratiche %}
+        <li>
+          <strong>{{ pratica.nome_azienda }}</strong> –
+          {% if pratica.tipo_pratica != 'altro' %}
+            {{ pratica.get_tipo_pratica_display }}
+          {% else %}
+            {{ pratica.tipo_personalizzato }}
+          {% endif %}
+
+          <div class="mt-3">
+            <u class="doc-label">📂 Documenti presenti:</u>
+            {% for doc in pratica.documenti.all %}
+              <span class="doc-link">
+                📄 <strong>{{ doc.nome }}</strong>
+                {% if doc.file %}
+                  – <a href="{{ doc.file.url }}" download>Scarica</a>
+                {% else %}
+                  – <span class="text-danger">(non caricato)</span>
+                {% endif %}
+              </span>
+            {% empty %}
+              <span class="doc-link">Nessun documento.</span>
+            {% endfor %}
+          </div>
+
+          <form method="post" action="{% url 'area_geometra' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="pratica_id" value="{{ pratica.id }}">
+            <input type="text" name="nome_documento" placeholder="Nome del documento tecnico" required>
+            <input type="file" name="file" required>
+            <button type="submit">📤 Carica documento</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="no-pratiche">🔍 Nessuna pratica assegnata al momento.</p>
+  {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}FG LEGIS - Area Immobiliare{% endblock %}</title>
+
+  <!-- ✅ SEO META TAG -->
+  <meta name="description" content="FG LEGIS - Piattaforma documentale immobiliare digitale con accesso riservato ad agenzie, store manager, notai e tecnici. Carica, firma e gestisci pratiche online.">
+  <meta name="keywords" content="FG LEGIS, gestione documentale immobiliare, pratiche digitali, agenzia immobiliare, notaio, geometra, store manager, piattaforma online">
+  <meta name="author" content="FG LEGIS">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.fglegis.com/" />
+
+  <!-- ✅ Google Search Console verification -->
+  <meta name="google-site-verification" content="KFQ9Weg6RRz_sRl3RZ0uKwYKD2uYqRu8oiTwlQJhrKI" />
+
+  <!-- ✅ Open Graph per condivisione social -->
+  <meta property="og:title" content="FG LEGIS - Gestione Pratiche Immobiliari" />
+  <meta property="og:description" content="Piattaforma digitale per caricare, firmare e gestire pratiche immobiliari in modo sicuro e professionale." />
+  <meta property="og:image" content="https://www.fglegis.com/static/img/logo_fglegis.png" />
+  <meta property="og:url" content="https://www.fglegis.com/" />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      color: #003366;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .navbar-brand img {
+      height: 30px;
+      width: auto;
+      display: inline-block;
+    }
+    .btn-primary {
+      background-color: #003366;
+      border-color: #003366;
+    }
+    .btn-primary:hover {
+      background-color: #00509e;
+      border-color: #00509e;
+    }
+    footer {
+      background-color: #003366;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
+      margin-top: 40px;
+    }
+    .nav-link.btn-link {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font-size: 1rem;
+      color: #003366;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .nav-link.btn-link:hover {
+      text-decoration: underline;
+    }
+    form.logout-form {
+      display: inline;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'real_estate:home' %}">
+      <img src="{% static 'img/logo_fglegis.png' %}" alt="Logo FG LEGIS" />
+      FG LEGIS
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'real_estate:area_personale' %}">Area Personale</a>
+          </li>
+          <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post" class="logout-form">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link">Logout</button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'real_estate:register' %}">Registrati</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-4">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<footer>
+  <div class="container">
+    <p class="mb-0">© 2025 FG LEGIS - Tutti i diritti riservati</p>
+    <small>Sede: Via Giotto Residenza Lago 122, Basiglio (MI) | PEC: fglegis@pec.it</small>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

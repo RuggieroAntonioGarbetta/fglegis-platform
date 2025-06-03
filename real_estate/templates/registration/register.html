@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <title>Registrati - FG LEGIS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #001f3f;
+            color: white;
+            font-family: 'Poppins', Arial, sans-serif;
+            padding: 80px 20px;
+            text-align: center;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        form {
+            background-color: #fff;
+            color: #001f3f;
+            display: inline-block;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="url"],
+        select {
+            padding: 10px;
+            width: 100%;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="file"] {
+            margin: 12px 0;
+            width: 100%;
+        }
+        button {
+            background-color: gold;
+            color: #001f3f;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #e6c200;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .login-link {
+            margin-top: 20px;
+            color: gold;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+        }
+        .errorlist {
+            color: #ff5555;
+            text-align: left;
+            margin: 0 0 10px 0;
+            padding-left: 0;
+            list-style: none;
+            font-size: 14px;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .logo {
+            width: 150px;
+            margin-bottom: 30px;
+        }
+        input {
+            display: block;
+        }
+        #logo-field,
+        #sito-field {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="{% static 'img/logo_fglegis.png' %}" alt="FG LEGIS" class="logo">
+
+    <h1>Registrati</h1>
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username.errors }}
+        {{ form.username }}
+
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email.errors }}
+        {{ form.email }}
+
+        <label for="{{ form.password1.id_for_label }}">Password</label>
+        {{ form.password1.errors }}
+        {{ form.password1 }}
+
+        <label for="{{ form.password2.id_for_label }}">Conferma Password</label>
+        {{ form.password2.errors }}
+        {{ form.password2 }}
+
+        <label for="{{ form.ruolo.id_for_label }}">Ruolo</label>
+        {{ form.ruolo.errors }}
+        {{ form.ruolo }}
+
+        <label for="{{ form.filiale.id_for_label }}">Filiale</label>
+        {{ form.filiale.errors }}
+        {{ form.filiale }}
+
+        <div id="logo-field">
+            <label for="{{ form.logo.id_for_label }}">Logo agenzia (solo per titolari)</label>
+            {{ form.logo.errors }}
+            {{ form.logo }}
+        </div>
+
+        <div id="sito-field">
+            <label for="{{ form.sito_web.id_for_label }}">Sito web</label>
+            {{ form.sito_web.errors }}
+            {{ form.sito_web }}
+        </div>
+
+        <button type="submit">Registrati</button>
+    </form>
+
+    <a href="{% url 'login' %}" class="login-link">Hai già un account? Accedi</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ruoloSelect = document.querySelector('select[name="ruolo"]');
+            const logoField = document.getElementById("logo-field");
+            const sitoField = document.getElementById("sito-field");
+
+            function toggleBrandingFields() {
+                const selected = ruoloSelect.value;
+                if (selected === "titolare_agenzia") {
+                    logoField.style.display = "block";
+                    sitoField.style.display = "block";
+                } else {
+                    logoField.style.display = "none";
+                    sitoField.style.display = "none";
+                }
+            }
+
+            toggleBrandingFields();
+            ruoloSelect.addEventListener("change", toggleBrandingFields);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - FG LEGIS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #001f3f;
+      color: white;
+      font-family: 'Poppins', Arial, sans-serif;
+      text-align: center;
+      padding-top: 80px;
+      margin: 0;
+    }
+
+    h1 {
+      color: gold;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 140px;
+      margin-bottom: 30px;
+    }
+
+    form {
+      background-color: white;
+      color: #001f3f;
+      display: inline-block;
+      padding: 30px;
+      border-radius: 10px;
+      margin-top: 20px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      text-align: left;
+    }
+
+    input {
+      padding: 10px;
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: gold;
+      color: #001f3f;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #ffd700;
+    }
+
+    .link {
+      color: gold;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 20px;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    .errorlist {
+      color: red;
+      list-style: none;
+      padding: 0;
+    }
+
+    .alert {
+      color: red;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="{% static 'img/logo_fglegis.png' %}" alt="Logo FG LEGIS" class="logo">
+  <h1>Accedi all’area personale</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+      <div class="alert">
+        {% for error in form.non_field_errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div>
+      {{ form.username.label_tag }}
+      {{ form.username }}
+      {% if form.username.errors %}
+        <ul class="errorlist">
+          {% for error in form.username.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    <div>
+      {{ form.password.label_tag }}
+      {{ form.password }}
+      {% if form.password.errors %}
+        <ul class="errorlist">
+          {% for error in form.password.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    <button type="submit">🔐 Accedi</button>
+  </form>
+
+  <p><a href="{% url 'real_estate:home' %}" class="link">⬅ Torna alla home</a></p>
+
+</body>
+</html>

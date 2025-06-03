@@ -1,0 +1,67 @@
+{% extends 'real_estate/base.html' %}
+{% load static %}
+
+{% block title %}Crea nuova pratica - FG LEGIS{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --primary-color: {{ colore_primario|default:"#001f3f" }};
+    --accent-color: {{ colore_accento|default:"#ffcc00" }};
+  }
+
+  body {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-color);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(0.9);
+  }
+
+  .border-primary {
+    border-color: var(--accent-color) !important;
+  }
+
+  a.text-primary {
+    color: var(--accent-color) !important;
+  }
+
+  a.text-primary:hover {
+    filter: brightness(1.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="text-center mb-4" style="color: var(--accent-color);">
+    🏗️ Crea una nuova pratica immobiliare
+  </h1>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <form method="post" class="bg-white p-4 border-start border-5 shadow-sm rounded border-primary">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-text mb-3">
+          Se selezioni <strong>"Altro"</strong> come tipo di pratica, specifica il nome personalizzato nel campo dedicato.
+        </div>
+        <button type="submit" class="btn btn-primary w-100">💾 Salva pratica</button>
+      </form>
+
+      <div class="text-center mt-4">
+        <a href="{% url 'real_estate:area_personale' %}" class="text-decoration-none fw-bold text-primary">
+          ⬅ Torna all’area personale
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

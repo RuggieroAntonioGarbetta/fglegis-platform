@@ -1,0 +1,116 @@
+{% extends 'real_estate/base.html' %}
+{% load static %}
+
+{% block title %}Area Personale - FG LEGIS{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --primary-color: {{ colore_primario|default:"#001f3f" }};
+    --accent-color: {{ colore_accento|default:"#ffcc00" }};
+  }
+
+  body {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-color);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(0.9);
+  }
+
+  .btn-outline-primary {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    {% if logo_personalizzato %}
+      <img src="{{ logo_personalizzato.url }}" alt="Logo Agenzia" style="max-height: 80px;" class="mb-3">
+    {% endif %}
+    {% if sito_web_personalizzato %}
+      <div>
+        <a href="{{ sito_web_personalizzato }}" target="_blank" class="text-warning">🌐 Visita il sito dell'agenzia</a>
+      </div>
+    {% endif %}
+    <h1 class="fw-bold">Benvenuto, {{ user.username }}</h1>
+  </div>
+
+  {% if profilo.ruolo in ruoli_per_creare_pratica %}
+    <div class="text-center mb-4">
+      <a href="{% url 'real_estate:crea_pratica' %}" class="btn btn-primary btn-lg">➕ Crea nuova pratica</a>
+    </div>
+  {% endif %}
+
+  {% if pratiche_info %}
+    <h2 class="text-warning mb-3">Le tue pratiche</h2>
+    <ul class="list-unstyled">
+      {% for item in pratiche_info %}
+        <li class="bg-white p-4 mb-3 border-start border-4 shadow-sm" style="border-color: var(--primary-color);">
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+              <h5 class="mb-1 text-dark fw-bold">{{ item.pratica.nome_azienda }}</h5>
+              <small class="text-muted">
+                {% if item.pratica.tipo_pratica != 'altro' %}
+                  {{ item.pratica.get_tipo_pratica_display }}
+                {% else %}
+                  {{ item.pratica.tipo_personalizzato }}
+                {% endif %}
+              </small>
+            </div>
+            <div>
+              {% if item.pratica.completata %}
+                <span class="badge bg-success">✅ Completata</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">🕓 In lavorazione</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mt-2 text-muted">
+            👤 <strong>Autore:</strong> {{ item.pratica.utente.username }} |
+            📍 <strong>Filiale:</strong> {{ item.pratica.utente.profiloutente.filiale|default:"N/A" }}
+          </div>
+
+          <div class="mt-2">
+            📂 <strong>{{ item.caricati }}</strong> / {{ item.totale }} documenti caricati
+            <br>
+            📅 <strong>Scadenza:</strong> {{ item.pratica.data_scadenza|date:"d/m/Y"|default:"—" }}
+          </div>
+
+          {% if item.pratica.data_scadenza and item.pratica.data_scadenza <= today %}
+            <div class="alert alert-danger mt-2 mb-0 p-2">
+              ⚠️ Pratica in scadenza o scaduta!
+            </div>
+          {% endif %}
+
+          <div class="mt-3">
+            <a href="{% url 'real_estate:dettaglio_pratica' item.pratica.id %}" class="btn btn-outline-primary btn-sm">
+              🔍 Apri pratica
+            </a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info text-center mt-4">
+      Nessuna pratica trovata.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

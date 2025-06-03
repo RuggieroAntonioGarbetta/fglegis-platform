@@ -1,0 +1,32 @@
+{% extends 'real_estate/base.html' %}
+{% load static %}
+
+{% block title %}FG LEGIS - Area Documentale Immobiliare{% endblock %}
+
+{% block content %}
+<div class="text-center d-flex flex-column justify-content-center align-items-center" style="background-color: #001f3f; min-height: 80vh; padding: 60px 20px; color: white;">
+
+  <!-- Logo FG LEGIS -->
+  <img src="{% static 'img/logo_fglegis.png' %}" alt="Logo FG LEGIS" style="width: 160px; margin-bottom: 30px;" loading="lazy">
+
+  <!-- Titolo ben visibile -->
+  <h1 style="color: gold; font-size: 2rem; margin-bottom: 20px;">
+    Benvenuto in FG LEGIS
+  </h1>
+
+  <!-- Descrizione SEO-friendly -->
+  <p style="font-size: 1.1rem; max-width: 600px; margin-bottom: 30px;">
+    La piattaforma documentale immobiliare riservata a operatori qualificati: agenzie, store manager, notai e tecnici. Accedi all’area personale per caricare e gestire le pratiche in modo semplice, digitale e sicuro.
+  </p>
+
+  <!-- CTA responsive -->
+  <div class="d-flex flex-column flex-md-row gap-3 mt-3">
+    <a href="{% url 'login' %}" class="btn btn-warning btn-lg fw-bold text-dark px-4">
+      🔑 Accedi
+    </a>
+    <a href="{% url 'real_estate:register' %}" class="btn btn-outline-warning btn-lg fw-bold px-4" style="color: gold; border-color: gold;">
+      📝 Registrati
+    </a>
+  </div>
+</div>
+{% endblock %}

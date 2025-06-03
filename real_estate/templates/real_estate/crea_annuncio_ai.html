@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Crea Annuncio AI - {{ pratica.nome_azienda }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: {{ colore_primario|default:"#001f3f" }};
+            --accent-color: {{ colore_accento|default:"#ffcc00" }};
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .container {
+            background: #fff;
+            color: var(--primary-color);
+            margin-top: 50px;
+            padding: 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 15px;
+            display: block;
+        }
+
+        textarea, input[type="file"], select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #e6c200;
+        }
+
+        a.back-link {
+            display: block;
+            margin-top: 20px;
+            color: var(--accent-color);
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+
+        .logo {
+            width: 120px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    {% if logo_personalizzato %}
+        <img src="{{ logo_personalizzato.url }}" alt="Logo Agenzia" class="logo">
+    {% else %}
+        <img src="{% static 'img/logo_fglegis.png' %}" alt="FG LEGIS" class="logo">
+    {% endif %}
+
+    <div class="container">
+        <h1>Crea Annuncio AI per<br><em>{{ pratica.nome_azienda }}</em></h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <label for="{{ form.titolo.id_for_label }}">Titolo</label>
+            {{ form.titolo.errors }}
+            {{ form.titolo }}
+
+            <label for="{{ form.descrizione.id_for_label }}">Descrizione</label>
+            {{ form.descrizione.errors }}
+            {{ form.descrizione }}
+
+            <label for="{{ form.tipologia.id_for_label }}">Tipologia di caricamento</label>
+            {{ form.tipologia.errors }}
+            {{ form.tipologia }}
+
+            <label for="id_immagini">Foto (puoi selezionare più file)</label>
+            {% if form.immagini.errors %}
+                <div style="color:red">{{ form.immagini.errors }}</div>
+            {% endif %}
+            <input type="file" name="immagini" id="id_immagini" class="form-control" multiple>
+
+            <label for="{{ form.video.id_for_label }}">Video</label>
+            {{ form.video.errors }}
+            {{ form.video }}
+
+            <button type="submit" class="btn-submit">Crea Annuncio AI</button>
+        </form>
+
+        <a href="{% url 'real_estate:area_personale' %}" class="back-link">⬅ Torna alla dashboard</a>
+    </div>
+
+</body>
+</html>

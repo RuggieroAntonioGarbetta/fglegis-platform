@@ -1,0 +1,166 @@
+{% extends 'real_estate/base.html' %}
+{% load static %}
+
+{% block title %}Dettaglio pratica - FG LEGIS{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --primary-color: {{ colore_primario|default:"#001f3f" }};
+    --accent-color: {{ colore_accento|default:"#ffcc00" }};
+  }
+
+  body {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-color);
+  }
+
+  .btn-primary:hover,
+  .btn-warning:hover,
+  .btn-outline-primary:hover {
+    filter: brightness(0.9);
+  }
+
+  .btn-warning {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-color);
+  }
+
+  .btn-outline-primary {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="mb-4" style="color: var(--accent-color);">
+    Pratica: {{ pratica.nome_azienda }} –
+    {% if pratica.tipo_pratica != 'altro' %}
+      {{ pratica.get_tipo_pratica_display }}
+    {% else %}
+      {{ pratica.tipo_personalizzato }}
+    {% endif %}
+  </h1>
+
+  <!-- DOCUMENTI -->
+  <div class="card mb-4 border-warning shadow-sm">
+    <div class="card-header bg-warning text-dark fw-bold">
+      📂 Documenti caricati 
+      <span class="badge bg-success ms-2">{{ completamento }}%</span>
+    </div>
+    <div class="card-body">
+      {% if documenti %}
+        <div class="row">
+          {% for documento in documenti %}
+            <div class="col-md-6 mb-3">
+              <div class="p-3 border rounded bg-light">
+                <strong>📄 {{ documento.nome }}</strong><br>
+                {% if documento.file %}
+                  ✅ Caricato il {{ documento.caricato_il|date:"d/m/Y H:i" }}<br>
+                  🔗 <a href="{{ documento.file.url }}" class="btn btn-sm btn-outline-primary mt-1" download>Scarica</a>
+                {% else %}
+                  <span class="text-danger">❌ Documento mancante</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Nessun documento presente.</p>
+      {% endif %}
+
+      <!-- Upload multiplo -->
+      <form method="post" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        <label for="id_file" class="form-label fw-semibold">Seleziona uno o più file:</label>
+        <input type="file" name="file" multiple class="form-control mb-3" id="id_file">
+        <button type="submit" name="upload_documento" class="btn btn-primary">Carica</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ANNUNCIO AI -->
+  {% if profilo.ruolo in 'admin titolare_agenzia store_manager agente' %}
+    <div class="card mb-4 border-success shadow-sm">
+      <div class="card-header bg-success text-white fw-bold">
+        📢 Annuncio AI
+      </div>
+      <div class="card-body">
+        <p class="mb-3">Puoi generare automaticamente un annuncio promozionale per questa pratica.</p>
+        <a href="{% url 'real_estate:crea_annuncio_ai' pratica.id %}" class="btn btn-warning">
+          🎬 Crea Annuncio AI
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- NOTE E COMUNICAZIONI -->
+  <div class="card mb-4 border-info shadow-sm">
+    <div class="card-header bg-info text-white fw-bold">
+      📝 Note e comunicazioni
+    </div>
+    <div class="card-body">
+      {% if note %}
+        {% for nota in note %}
+          <div class="mb-3 p-3 border rounded {% if nota.risposta_a %}border-dashed border-secondary ms-4{% else %}border-primary{% endif %} bg-white">
+            <strong>✍️ {{ nota.autore.username }}</strong> – 
+            <small class="text-muted">{{ nota.data_creazione|date:"d/m/Y H:i" }}</small><br>
+            <p class="mt-2">{{ nota.testo|linebreaks }}</p>
+
+            {% if not nota.risposta_a %}
+              <form method="post" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="risposta_a" value="{{ nota.id }}">
+                <textarea name="testo" rows="2" class="form-control mb-2" placeholder="Rispondi..."></textarea>
+                <button type="submit" name="rispondi_nota" class="btn btn-secondary btn-sm">Rispondi</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">Nessuna nota presente.</p>
+      {% endif %}
+
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ nota_form.as_p }}
+        <button type="submit" name="aggiungi_nota" class="btn btn-primary">Aggiungi nota</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- STORICO ATTIVITÀ -->
+  <div class="card mb-4 border-secondary shadow-sm">
+    <div class="card-header bg-secondary text-white fw-bold">
+      📜 Storico attività
+    </div>
+    <div class="card-body">
+      {% if log_attivita %}
+        {% for voce in log_attivita %}
+          <div class="mb-2 p-3 border rounded bg-white">
+            🕒 <strong>{{ voce.timestamp|date:"d/m/Y H:i" }}</strong><br>
+            👤 {% if voce.utente %}{{ voce.utente.username }}{% else %}Sistema{% endif %}<br>
+            📌 {{ voce.azione }}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">Nessuna attività registrata.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
