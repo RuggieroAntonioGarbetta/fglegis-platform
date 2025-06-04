@@ -11,6 +11,54 @@ TIPO_PRATICA_CHOICES = [
     ('altro', 'Altro'),
 ]
 
+RUOLI = [
+    ('admin', 'Admin'),
+    ('titolare_agenzia', 'Titolare Agenzia'),
+    ('store_manager', 'Store Manager'),
+    ('agente', 'Agente'),
+    ('notaio', 'Notaio'),
+    ('geometra', 'Geometra'),
+]
+
+class ProfiloUtente(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    ruolo = models.CharField(max_length=20, choices=RUOLI)
+    filiale = models.CharField(max_length=100, blank=True, null=True)
+
+    titolare = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='titolare_utenti',
+        help_text='Solo per store manager e agenti: titolare del gruppo'
+    )
+    store_manager = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='store_manager_utenti',
+        help_text='Solo per agenti: store manager di riferimento'
+    )
+
+    logo = models.ImageField(upload_to='loghi_utente/', null=True, blank=True)
+    sito_web = models.URLField(blank=True, null=True)
+
+    in_fase_di_registrazione = models.BooleanField(default=True)
+
+    def __str__(self):
+        nome = f"{self.user.first_name} {self.user.last_name}".strip() or self.user.username
+        stato = "In registrazione" if self.in_fase_di_registrazione else "Attivo"
+        return f"{nome} – {self.ruolo.capitalize()} – {stato}"
+
+
+@receiver(post_save, sender=User)
+def crea_profilo_utente(sender, instance, created, **kwargs):
+    if created:
+        ProfiloUtente.objects.create(user=instance)
+
+
 class PraticaImmobiliare(models.Model):
     nome_azienda = models.CharField(max_length=255)
     tipo_pratica = models.CharField(
@@ -25,8 +73,25 @@ class PraticaImmobiliare(models.Model):
         verbose_name="Altro tipo (se specificato)"
     )
     utente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pratiche_utente")
-    notaio = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="pratiche_notaio")
-    geometra = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="pratiche_geometra")
+
+    notaio = models.ForeignKey(
+        ProfiloUtente,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pratiche_notaio",
+        limit_choices_to={'ruolo': 'notaio', 'in_fase_di_registrazione': False}
+    )
+
+    geometra = models.ForeignKey(
+        ProfiloUtente,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pratiche_geometra",
+        limit_choices_to={'ruolo': 'geometra', 'in_fase_di_registrazione': False}
+    )
+
     note = models.TextField(blank=True, null=True, verbose_name="Note interne / comunicazioni")
     data_creazione = models.DateTimeField(auto_now_add=True)
     data_scadenza = models.DateField(null=True, blank=True, verbose_name="Data di scadenza")
@@ -101,55 +166,7 @@ class LogAttivitaPratica(models.Model):
     def __str__(self):
         return f"{self.timestamp.strftime('%d/%m/%Y %H:%M')} – {self.utente.username if self.utente else 'Sistema'} – {self.azione}"
 
-RUOLI = [
-    ('admin', 'Admin'),
-    ('titolare_agenzia', 'Titolare Agenzia'),
-    ('store_manager', 'Store Manager'),
-    ('agente', 'Agente'),
-    ('notaio', 'Notaio'),
-    ('geometra', 'Geometra'),
-]
 
-
-class ProfiloUtente(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    ruolo = models.CharField(max_length=20, choices=RUOLI)
-    filiale = models.CharField(max_length=100, blank=True, null=True)
-
-    titolare = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='titolare_utenti',
-        help_text='Solo per store manager e agenti: titolare del gruppo'
-    )
-    store_manager = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='store_manager_utenti',
-        help_text='Solo per agenti: store manager di riferimento'
-    )
-
-    logo = models.ImageField(upload_to='loghi_utente/', null=True, blank=True)
-    sito_web = models.URLField(blank=True, null=True)
-
-    in_fase_di_registrazione = models.BooleanField(default=True)
-
-    def __str__(self):
-        stato = "In registrazione" if self.in_fase_di_registrazione else "Attivo"
-        return f"{self.user.username} – {self.ruolo} – {stato}"
-
-
-@receiver(post_save, sender=User)
-def crea_profilo_utente(sender, instance, created, **kwargs):
-    if created:
-        ProfiloUtente.objects.create(user=instance)
-
-
-# ✅ MODELLO ANNUNCIO AI
 class AnnuncioAI(models.Model):
     TIPOLOGIA = [
         ('foto', 'Carica Foto'),

@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from .models import PraticaImmobiliare, NotaPratica, AnnuncioAI, ProfiloUtente
 
 
-# ✅ Form personalizzato per la registrazione con scelta ruolo e branding
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
         required=True,
@@ -39,20 +38,11 @@ class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['username'].widget.attrs.update({
-            'class': 'form-control', 'placeholder': 'Username'
-        })
-        self.fields['email'].widget.attrs.update({
-            'class': 'form-control', 'placeholder': 'Email'
-        })
-        self.fields['password1'].widget.attrs.update({
-            'class': 'form-control', 'placeholder': 'Password'
-        })
-        self.fields['password2'].widget.attrs.update({
-            'class': 'form-control', 'placeholder': 'Conferma Password'
-        })
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Username'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Email'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Conferma Password'})
 
-        # ✅ Nasconde logo e sito SOLO dopo il submit se non è titolare
         if self.data and self.data.get('ruolo') != 'titolare_agenzia':
             self.fields['logo'].widget = forms.HiddenInput()
             self.fields['sito_web'].widget = forms.HiddenInput()
@@ -75,37 +65,49 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 
-    # ✅ Form per creazione pratica immobiliare
 class CreaPraticaForm(forms.ModelForm):
-        class Meta:
-            model = PraticaImmobiliare
-            fields = ['nome_azienda', 'tipo_pratica', 'tipo_personalizzato', 'notaio', 'geometra']
-            widgets = {
-                'nome_azienda': forms.TextInput(attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Nome azienda'
-                }),
-                'tipo_pratica': forms.Select(attrs={'class': 'form-control'}),
-                'tipo_personalizzato': forms.TextInput(attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Specificare tipo se "Altro"'
-                }),
-                'notaio': forms.Select(attrs={'class': 'form-control'}),
-                'geometra': forms.Select(attrs={'class': 'form-control'}),
-            }
+    class Meta:
+        model = PraticaImmobiliare
+        fields = ['nome_azienda', 'tipo_pratica', 'tipo_personalizzato', 'notaio', 'geometra']
+        widgets = {
+            'nome_azienda': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome azienda'}),
+            'tipo_pratica': forms.Select(attrs={'class': 'form-control'}),
+            'tipo_personalizzato': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Specificare tipo se "Altro"'}),
+            'notaio': forms.Select(attrs={'class': 'form-control'}),
+            'geometra': forms.Select(attrs={'class': 'form-control'}),
+        }
 
-        def __init__(self, *args, **kwargs):
-            user = kwargs.pop('user', None)
-            super().__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
-            if user:
-                profilo = getattr(user, 'profiloutente', None)
-                if not profilo or profilo.ruolo != 'admin':
-                    self.fields.pop('notaio', None)
-                    self.fields.pop('geometra', None)
+        from .models import ProfiloUtente
+
+        # Imposta sempre queryset filtrati per ruolo e attivazione
+        self.fields['notaio'].queryset = ProfiloUtente.objects.filter(
+            ruolo='notaio',
+            in_fase_di_registrazione=False
+        )
+        self.fields['geometra'].queryset = ProfiloUtente.objects.filter(
+            ruolo='geometra',
+            in_fase_di_registrazione=False
+        )
+
+        # Se non ci sono notai o geometri, mostra tendina vuota
+        if not self.fields['notaio'].queryset.exists():
+            self.fields['notaio'].choices = [('', '— Nessun notaio disponibile —')]
+
+        if not self.fields['geometra'].queryset.exists():
+            self.fields['geometra'].choices = [('', '— Nessun geometra disponibile —')]
+
+        # Se non admin, rimuovi i campi
+        if user:
+            profilo = getattr(user, 'profiloutente', None)
+            if not profilo or profilo.ruolo != 'admin':
+                self.fields.pop('notaio', None)
+                self.fields.pop('geometra', None)
 
 
-# ✅ Form per caricamento singolo documento
 class CaricaDocumentoForm(forms.Form):
     file = forms.FileField(
         label='Carica documento',
@@ -113,7 +115,6 @@ class CaricaDocumentoForm(forms.Form):
     )
 
 
-# ✅ Form per inserimento note nella pratica
 class NotaPraticaForm(forms.ModelForm):
     class Meta:
         model = NotaPratica
@@ -127,21 +128,13 @@ class NotaPraticaForm(forms.ModelForm):
         }
 
 
-# ✅ Form per creazione annuncio AI
 class CreaAnnuncioAIForm(forms.ModelForm):
     class Meta:
         model = AnnuncioAI
         fields = ['titolo', 'descrizione', 'tipologia', 'immagini', 'video']
         widgets = {
-            'titolo': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Titolo annuncio'
-            }),
-            'descrizione': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Descrizione dettagliata dell\'immobile (obbligatoria)',
-                'rows': 5
-            }),
+            'titolo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Titolo annuncio'}),
+            'descrizione': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Descrizione dettagliata dell\'immobile (obbligatoria)', 'rows': 5}),
             'tipologia': forms.Select(attrs={'class': 'form-control'}),
             'immagini': forms.FileInput(attrs={'class': 'form-control'}),
             'video': forms.FileInput(attrs={'class': 'form-control'}),
@@ -157,10 +150,9 @@ class CreaAnnuncioAIForm(forms.ModelForm):
             raise forms.ValidationError("Hai selezionato 'Carica Foto' ma non hai caricato alcuna immagine.")
         if tipologia == 'video' and not video:
             raise forms.ValidationError("Hai selezionato 'Carica Video' ma non hai caricato alcun file video.")
-
         return cleaned_data
 
-# ✅ Form per i dati venditore
+
 class InfoVenditoreForm(forms.ModelForm):
     class Meta:
         model = PraticaImmobiliare
@@ -173,7 +165,7 @@ class InfoVenditoreForm(forms.ModelForm):
             'venditore_cellulare': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-# ✅ Form per i dati acquirente
+
 class InfoAcquirenteForm(forms.ModelForm):
     class Meta:
         model = PraticaImmobiliare
@@ -184,3 +176,14 @@ class InfoAcquirenteForm(forms.ModelForm):
             'acquirente_email': forms.EmailInput(attrs={'class': 'form-control'}),
             'acquirente_cellulare': forms.TextInput(attrs={'class': 'form-control'}),
         }
+class AssegnaProfessionistiForm(forms.Form):
+    notaio = forms.ModelChoiceField(
+        queryset=ProfiloUtente.objects.filter(ruolo='notaio'),
+        required=False,
+        label="Assegna Notaio"
+    )
+    geometra = forms.ModelChoiceField(
+        queryset=ProfiloUtente.objects.filter(ruolo='geometra'),
+        required=False,
+        label="Assegna Geometra"
+    )

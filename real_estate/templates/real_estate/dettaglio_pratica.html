@@ -74,6 +74,12 @@
                   🔗 <a href="{{ documento.file.url }}" class="btn btn-sm btn-outline-primary mt-1" download>Scarica</a>
                 {% else %}
                   <span class="text-danger">❌ Documento mancante</span>
+                  <form method="post" enctype="multipart/form-data" class="mt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="documento_id" value="{{ documento.id }}">
+                    <input type="file" name="file" class="form-control form-control-sm mb-2" required>
+                    <button type="submit" name="upload_singolo_documento" class="btn btn-sm btn-warning">📎 Allega file</button>
+                  </form>
                 {% endif %}
               </div>
             </div>
@@ -94,7 +100,7 @@
   </div>
 
   <!-- ANNUNCIO AI -->
-  {% if profilo.ruolo in 'admin titolare_agenzia store_manager agente' %}
+  {% if profilo.ruolo in "admin titolare_agenzia store_manager agente" %}
     <div class="card mb-4 border-success shadow-sm">
       <div class="card-header bg-success text-white fw-bold">
         📢 Annuncio AI
@@ -139,6 +145,20 @@
         {% csrf_token %}
         {{ nota_form.as_p }}
         <button type="submit" name="aggiungi_nota" class="btn btn-primary">Aggiungi nota</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ASSEGNAZIONE NOTAIO E GEOMETRA -->
+  <div class="card mb-4 border-danger shadow-sm">
+    <div class="card-header bg-danger text-white fw-bold">
+      👥 Assegna Notaio e Geometra
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ assegna_form.as_p }}
+        <button type="submit" name="assegna_professionisti" class="btn btn-warning mt-2">Assegna ora</button>
       </form>
     </div>
   </div>
